@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#14171A">
+<meta name="robots" content="noindex">
+<title>lernspiele — Übersicht</title>
+
+<!-- Meine private Liste der Spiele in diesem Repo.
+     Eine Datei, keine Abhängigkeiten, alle Links relativ. -->
+
+<style>
+  :root {
+    --tafel:   #14171A;
+    --schrift: #E7E3DC;
+    --leise:   #8E9AA3;
+    --linie:   rgba(255, 255, 255, .10);
+    --merk:    #D8B26A;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background-color: var(--tafel);
+    background-image:
+      linear-gradient(rgba(255, 255, 255, .028) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, .028) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color: var(--schrift);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .tafel {
+    max-width: 780px;
+    margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-top: calc(36px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* --- Kopf ------------------------------------------------------------ */
+
+  .kopf__titel {
+    margin: 0;
+    font-size: clamp(30px, 8vw, 40px);
+    font-weight: 700;
+    letter-spacing: -.02em;
+    text-wrap: balance;
+  }
+
+  .kopf__zeile {
+    margin: 6px 0 0;
+    color: var(--leise);
+    font-size: 15px;
+  }
+
+  .hinweis {
+    margin: 22px 0 0;
+    padding: 12px 14px;
+    border-left: 2px solid var(--merk);
+    border-radius: 0 10px 10px 0;
+    background: rgba(216, 178, 106, .06);
+    color: #CFC8BC;
+    font-size: 14px;
+    line-height: 1.55;
+    text-wrap: pretty;
+  }
+
+  .hinweis strong {
+    color: var(--merk);
+    font-weight: 600;
+  }
+
+  /* --- Regal ----------------------------------------------------------- */
+
+  .regal__titel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 40px 0 16px;
+    color: var(--leise);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  .regal__titel::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--linie);
+  }
+
+  .regal__raster {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .regal__raster li { display: flex; }
+
+  /* --- Kacheln: jede trägt die Palette ihres Spiels --------------------- */
+
+  .kachel--elfmeter {
+    --spiel-bg:     #0E2A1E;
+    --spiel-akzent: #F7B32B;
+    --spiel-text:   #EAF3EC;
+    --spiel-leise:  #95B3A2;
+  }
+
+  .kachel--radrennen {
+    --spiel-bg:     #241541;
+    --spiel-akzent: #FFD23F;
+    --spiel-text:   #FCEFD9;
+    --spiel-leise:  #B39ECB;
+  }
+
+  .kachel {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px 18px 16px;
+    border: 1px solid var(--linie);
+    border-top: 3px solid var(--spiel-akzent);
+    border-radius: 16px;
+    background: var(--spiel-bg);
+    color: var(--spiel-text);
+    text-decoration: none;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, .34);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+
+  .kachel:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, .22);
+    border-top-color: var(--spiel-akzent);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, .42);
+  }
+
+  .kachel:focus-visible {
+    outline: 3px solid var(--spiel-akzent);
+    outline-offset: 3px;
+  }
+
+  .kachel__name {
+    margin: 0;
+    color: var(--spiel-akzent);
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+  }
+
+  .marken {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .marke {
+    padding: 3px 9px;
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: 999px;
+    color: var(--spiel-leise);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .marke--fach {
+    border-color: var(--spiel-akzent);
+    color: var(--spiel-akzent);
+  }
+
+  .kachel__satz {
+    margin: 2px 0 0;
+    font-size: 15px;
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  .kachel__thema {
+    margin: 0;
+    color: var(--spiel-leise);
+    font-size: 13px;
+  }
+
+  .kachel__adresse {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, .12);
+    color: var(--spiel-leise);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px;
+  }
+
+  .kachel__pfeil {
+    color: var(--spiel-akzent);
+    font-size: 16px;
+    transition: transform .15s ease;
+  }
+
+  .kachel:hover .kachel__pfeil {
+    transform: translateX(3px);
+  }
+
+  /* --- Fuß ------------------------------------------------------------- */
+
+  .fuss {
+    margin-top: 32px;
+    padding-top: 14px;
+    border-top: 1px solid var(--linie);
+    color: var(--leise);
+    font-size: 13px;
+  }
+
+  .fuss p {
+    margin: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kachel,
+    .kachel__pfeil {
+      transition: none;
+    }
+
+    .kachel:hover,
+    .kachel:hover .kachel__pfeil {
+      transform: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="tafel">
+
+  <header>
+    <h1 class="kopf__titel">lernspiele</h1>
+    <p class="kopf__zeile">
+      Kleine Mathe-Spiele für die Kinder. Ein Ordner pro Spiel, eine HTML-Datei darin.
+    </p>
+    <p class="hinweis">
+      <strong>Nur meine Übersicht.</strong>
+      Diese Seite bleibt bei mir. In die Klassen-Gruppe geht immer die Adresse
+      des einzelnen Spiels — der Ordner, nie die Sammlung.
+    </p>
+  </header>
+
+  <main>
+    <h2 class="regal__titel">Spiele</h2>
+
+    <ul class="regal__raster">
+
+      <li>
+        <a class="kachel kachel--elfmeter" href="./elfmeter/">
+          <h3 class="kachel__name">Elfmeter-Einmaleins</h3>
+          <ul class="marken">
+            <li class="marke marke--fach">Mathe</li>
+            <li class="marke">Klasse 2–3</li>
+          </ul>
+          <p class="kachel__satz">
+            Einmaleins als Elfmeterschießen: Die Antwort wird eingetippt, nicht angeklickt.
+          </p>
+          <p class="kachel__thema">Kleines Einmaleins, Division, Zehnereinmaleins</p>
+          <span class="kachel__adresse">
+            ./elfmeter/
+            <span class="kachel__pfeil" aria-hidden="true">&rarr;</span>
+          </span>
+        </a>
+      </li>
+
+      <li>
+        <a class="kachel kachel--radrennen" href="./radrennen/">
+          <h3 class="kachel__name">Radrennen gegen Papa</h3>
+          <ul class="marken">
+            <li class="marke marke--fach">Mathe</li>
+            <li class="marke">Klasse 2–3</li>
+            <li class="marke">Mix-Modus bis Klasse 4</li>
+          </ul>
+          <p class="kachel__satz">
+            Einmaleins-Rennen gegen Papa: richtig rechnen fährt vor, schnell rechnen doppelt.
+          </p>
+          <p class="kachel__thema">Einmaleins, Division, Platzhalter- und Zehneraufgaben</p>
+          <span class="kachel__adresse">
+            ./radrennen/
+            <span class="kachel__pfeil" aria-hidden="true">&rarr;</span>
+          </span>
+        </a>
+      </li>
+
+    </ul>
+  </main>
+
+  <footer class="fuss">
+    <p>Kein Server, kein Konto, keine Anmeldung — der Fortschritt bleibt im Browser des Geräts.</p>
+  </footer>
+
+</div>
+
+</body>
+</html>

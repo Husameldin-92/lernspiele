@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0E2A1E">
+<title>Elfmeter-Einmaleins</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@400;700;900&display=swap">
+<style>
+  :root{
+    --sky:#071A13;
+    --pitch:#0E2A1E;
+    --pitch-2:#16402D;
+    --line:#EAF3EC;
+    --gold:#F7B32B;
+    --gold-deep:#C98A12;
+    --good:#4ADE80;
+    --bad:#F2545B;
+    --text:#EAF3EC;
+    --muted:#95B3A2;
+    --r:18px;
+  }
+  *{box-sizing:border-box}
+  img{max-width:100%}
+  [hidden]{display:none!important}
+  body{
+    margin:0;
+    background:radial-gradient(120% 70% at 50% -10%, #17513A 0%, var(--pitch) 45%, var(--sky) 100%) fixed;
+    color:var(--text);
+    font-family:"Nunito", ui-rounded, "Segoe UI", system-ui, sans-serif;
+    font-weight:700;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:480px;margin:0 auto;padding-inline:16px;padding-block:18px 40px}
+  h1{
+    font-family:"Bungee","Nunito",sans-serif;font-weight:400;
+    font-size:clamp(26px,8vw,36px);line-height:1.05;margin:0;
+    text-wrap:balance;color:var(--gold);text-shadow:0 3px 0 rgba(0,0,0,.35);
+  }
+  .sub{margin:6px 0 0;color:var(--muted);font-size:14px;font-weight:700}
+  .screen{display:none}
+  .screen.on{display:block}
+
+  .week{margin-top:18px;background:rgba(255,255,255,.05);
+    border:2px solid rgba(234,243,236,.16);border-radius:var(--r);padding:12px 12px 10px}
+  .week h2,.panel h2,.tables h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 10px;font-weight:900}
+  .days{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .day{text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .day span{font-size:11px;color:var(--muted);font-weight:900;letter-spacing:.06em}
+  .dot{width:28px;height:28px;border-radius:50%;border:2px solid rgba(234,243,236,.3);
+    display:grid;place-items:center}
+  .dot.done{background:var(--line);border-color:var(--line)}
+  .dot.done::after{content:"";width:12px;height:12px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#2b2b2b 0 2px,transparent 2px),
+               radial-gradient(circle at 70% 65%,#2b2b2b 0 2px,transparent 2px)}
+  .day.test span{color:var(--gold)}
+  .day.test .dot{border-color:var(--gold);border-style:dashed}
+
+  .tables{margin-top:18px}
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .tbl{appearance:none;border:2px solid rgba(234,243,236,.2);background:rgba(255,255,255,.06);
+    color:var(--text);border-radius:14px;padding:10px 4px 8px;cursor:pointer;
+    font-family:inherit;font-weight:900;font-size:20px;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    transition:transform .08s ease,background .15s ease,border-color .15s ease}
+  .tbl:active{transform:translateY(2px)}
+  .tbl .stars{font-size:9px;letter-spacing:1px;color:var(--gold);height:11px;line-height:11px}
+  .tbl.mastered{border-color:var(--gold);background:rgba(247,179,43,.14)}
+
+  .big{width:100%;margin-top:10px;appearance:none;border:0;border-radius:var(--r);
+    font-family:"Bungee","Nunito",sans-serif;font-weight:400;font-size:18px;
+    padding:15px 14px;cursor:pointer;background:var(--gold);color:#1A1205;
+    box-shadow:0 6px 0 var(--gold-deep);transition:transform .08s ease,box-shadow .08s ease;
+    line-height:1.25}
+  .big small{display:block;font-family:"Nunito",sans-serif;font-weight:700;
+    font-size:12px;opacity:.75;margin-top:3px;letter-spacing:.02em}
+  .big:active{transform:translateY(4px);box-shadow:0 2px 0 var(--gold-deep)}
+  .big.ghost{background:transparent;color:var(--text);border:2px solid rgba(234,243,236,.28);
+    box-shadow:none;font-family:"Nunito",sans-serif;font-weight:900;font-size:16px}
+  .big.ghost small{opacity:.6;color:var(--muted)}
+  .big.ghost:active{transform:translateY(2px)}
+
+  .panel{margin-top:22px;padding-top:16px;border-top:2px dashed rgba(234,243,236,.18)}
+  .runs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+  .runs li{display:flex;justify-content:space-between;gap:10px;font-size:14px;
+    color:var(--muted);font-variant-numeric:tabular-nums}
+  .runs b{color:var(--text);font-weight:900}
+  .empty{font-size:14px;color:var(--muted);font-weight:700;margin:0}
+
+  /* ---- game ---- */
+  .board{display:flex;justify-content:space-between;gap:10px;margin-bottom:10px}
+  .stat{text-align:center;flex:1}
+  .stat b{display:block;font-family:"Bungee",sans-serif;font-weight:400;font-size:22px;
+    line-height:1;font-variant-numeric:tabular-nums}
+  .stat span{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:900}
+  .stat.goals b{color:var(--good)}
+  .stat.streak b{color:var(--gold)}
+
+  .clock{height:8px;border-radius:99px;background:rgba(234,243,236,.14);overflow:hidden;margin-bottom:10px}
+  .clock i{display:block;height:100%;width:100%;background:var(--good);border-radius:99px}
+  .clock.hidden{visibility:hidden}
+  .clock i.run{width:0%}
+  .clock i.warn{background:var(--bad)}
+
+  .pitch{position:relative;background:linear-gradient(180deg,var(--pitch-2) 0%,var(--pitch) 100%);
+    border:2px solid rgba(234,243,236,.18);border-radius:var(--r);overflow:hidden}
+  .pitch svg{display:block;width:100%;height:auto}
+  .ball{position:absolute;left:50%;bottom:9%;width:13%;aspect-ratio:1;
+    transform:translate(-50%,0);
+    transition:transform .5s cubic-bezier(.3,-0.2,.5,1.2),opacity .3s ease;will-change:transform}
+  .ball svg{width:100%;height:100%}
+  .flash{position:absolute;left:50%;top:8%;transform:translateX(-50%);
+    font-family:"Bungee","Nunito",sans-serif;font-size:clamp(18px,5.6vw,24px);
+    color:var(--good);background:rgba(4,16,11,.85);border-radius:999px;padding:7px 16px;
+    white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s ease}
+  .flash.show{opacity:1}
+  .flash.miss{color:var(--bad)}
+
+  .q{text-align:center;margin:14px 0 2px}
+  .q .lab{font-size:12px;color:var(--muted);font-weight:900;letter-spacing:.1em;
+    text-transform:uppercase;display:block;margin-bottom:6px}
+  .q .term{font-size:clamp(30px,10.5vw,44px);font-weight:900;line-height:1.1;
+    font-variant-numeric:tabular-nums;display:block}
+  .q .typed{color:var(--gold);border-bottom:4px solid var(--gold);
+    min-width:1.6em;display:inline-block;padding:0 .1em}
+  .q .typed.empty{border-bottom-color:rgba(247,179,43,.4)}
+
+  .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+  .key{appearance:none;border:2px solid rgba(234,243,236,.2);background:rgba(255,255,255,.07);
+    color:var(--text);border-radius:14px;padding:14px 0;cursor:pointer;
+    font-family:inherit;font-weight:900;font-size:24px;font-variant-numeric:tabular-nums;
+    transition:transform .07s ease,background .12s ease}
+  .key:active{transform:translateY(3px);background:rgba(255,255,255,.16)}
+  .key.go{background:var(--gold);color:#1A1205;border-color:var(--gold);
+    font-family:"Bungee","Nunito",sans-serif;font-weight:400;font-size:17px}
+  .key.del{color:var(--muted);font-size:20px}
+  .key:disabled{opacity:.45;cursor:default}
+
+  .row{display:flex;gap:10px;margin-top:12px}
+  .mini{appearance:none;background:transparent;border:2px solid rgba(234,243,236,.22);
+    color:var(--muted);border-radius:12px;padding:9px 12px;cursor:pointer;
+    font-family:inherit;font-weight:900;font-size:13px;flex:1}
+  .mini[aria-pressed="true"]{color:var(--gold);border-color:var(--gold)}
+  .spicker{margin-top:12px;display:none;background:rgba(255,255,255,.05);
+    border:2px dashed rgba(234,243,236,.18);border-radius:14px;padding:12px;
+    grid-template-columns:1fr 1fr;gap:4px 14px;font-size:15px;
+    font-variant-numeric:tabular-nums;color:var(--muted)}
+  .spicker.on{display:grid}
+  .spicker b{color:var(--text)}
+
+  /* ---- end / halftime ---- */
+  .urkunde{margin-top:14px;text-align:center;background:rgba(255,255,255,.06);
+    border:3px solid var(--gold);border-radius:var(--r);padding:22px 16px}
+  .urkunde .score{font-family:"Bungee",sans-serif;font-size:52px;line-height:1;
+    color:var(--gold);font-variant-numeric:tabular-nums}
+  .urkunde .of{color:var(--muted);font-size:15px;margin-top:4px}
+  .urkunde .stars{font-size:26px;letter-spacing:6px;color:var(--gold);margin-top:10px}
+  .urkunde .msg{margin-top:14px;font-size:17px;font-weight:900;text-wrap:balance}
+  .weak{margin-top:12px;font-size:14px;color:var(--muted);font-weight:700}
+  .weak b{color:var(--text)}
+  .tape{display:flex;gap:6px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+  .tape i{width:11px;height:11px;border-radius:50%;background:rgba(234,243,236,.25);display:block}
+  .tape i.hit{background:var(--good)}
+  .tape i.missed{background:var(--bad)}
+
+  @media (prefers-reduced-motion: reduce){ .ball{transition:none} .clock i{transition:none!important} }
+  :focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ============ START ============ -->
+  <section id="start" class="screen on">
+    <h1>Elfmeter-<br>Einmaleins</h1>
+    <p class="sub">Antwort selbst eintippen. Keine Auswahl zum Raten.</p>
+
+    <div class="week">
+      <h2>Diese Woche geübt</h2>
+      <div class="days" id="days"></div>
+    </div>
+
+    <div class="tables">
+      <h2>Eine Reihe trainieren · 20 Aufgaben</h2>
+      <div class="grid" id="tableGrid"></div>
+      <button class="big" id="btnCup">Turnier<small>3 Halbzeiten · 45 Aufgaben · wird immer schwerer</small></button>
+      <button class="big ghost" id="btnTest">Prüfung<small>30 Aufgaben mit Uhr · deine schwächsten Reihen</small></button>
+    </div>
+
+    <div class="panel">
+      <h2>Für Papa</h2>
+      <ul class="runs" id="runs"></ul>
+    </div>
+  </section>
+
+  <!-- ============ GAME ============ -->
+  <section id="game" class="screen">
+    <div class="board">
+      <div class="stat goals"><b id="sGoals">0</b><span>Tore</span></div>
+      <div class="stat streak"><b id="sStreak">0</b><span>Serie</span></div>
+      <div class="stat"><b id="sLeft">20</b><span>übrig</span></div>
+      <div class="stat"><b id="sPhase">1</b><span id="sPhaseLab">Halbzeit</span></div>
+    </div>
+
+    <div class="clock hidden" id="clock"><i id="clockBar"></i></div>
+
+    <div class="pitch">
+      <svg viewBox="0 0 300 180" aria-hidden="true">
+        <defs>
+          <pattern id="net" width="10" height="10" patternUnits="userSpaceOnUse">
+            <path d="M10 0H0v10" fill="none" stroke="rgba(234,243,236,.26)" stroke-width="1"/>
+          </pattern>
+        </defs>
+        <rect x="40" y="26" width="220" height="104" fill="url(#net)"/>
+        <rect x="40" y="26" width="220" height="104" fill="rgba(7,26,19,.35)"/>
+        <path d="M38 132V24h224v108" fill="none" stroke="#EAF3EC" stroke-width="7" stroke-linejoin="round"/>
+        <path d="M8 152h284" stroke="rgba(234,243,236,.35)" stroke-width="3"/>
+        <circle cx="150" cy="167" r="3" fill="rgba(234,243,236,.5)"/>
+        <g id="keeper">
+          <rect x="139" y="74" width="23" height="46" rx="10" fill="#F2545B"/>
+          <circle cx="150.5" cy="66" r="10" fill="#F6C89A"/>
+          <rect x="120" y="62" width="17" height="13" rx="6" fill="#FFD166"/>
+          <rect x="164" y="62" width="17" height="13" rx="6" fill="#FFD166"/>
+          <path d="M126 74l13 6M175 74l-13 6" stroke="#F2545B" stroke-width="7" stroke-linecap="round"/>
+        </g>
+      </svg>
+      <div class="ball" id="ball">
+        <svg viewBox="0 0 40 40" aria-hidden="true">
+          <circle cx="20" cy="20" r="18" fill="#fff" stroke="#123" stroke-width="1.5"/>
+          <path d="M20 8l6 4.5-2.3 7h-7.4l-2.3-7z" fill="#15241C"/>
+          <path d="M8.5 22.5l4.5 3-1.5 5.5M31.5 22.5l-4.5 3 1.5 5.5M20 38v-5" stroke="#15241C" stroke-width="2.2" fill="none"/>
+        </svg>
+      </div>
+      <div class="flash" id="flash">TOR!</div>
+    </div>
+
+    <p class="q">
+      <span class="lab" id="qLabel">Schuss 1</span>
+      <span class="term" id="qTerm"></span>
+    </p>
+
+    <div class="pad" id="pad"></div>
+
+    <div class="row">
+      <button class="mini" id="btnSpicker" aria-pressed="false">Spicker</button>
+      <button class="mini" id="btnQuit">Abbrechen</button>
+    </div>
+    <div class="spicker" id="spicker"></div>
+  </section>
+
+  <!-- ============ END / HALFTIME ============ -->
+  <section id="end" class="screen">
+    <h1 id="endTitle">Abpfiff!</h1>
+    <div class="urkunde">
+      <div class="score" id="endScore">0</div>
+      <div class="of" id="endOf"></div>
+      <div class="stars" id="endStars"></div>
+      <div class="tape" id="endTape"></div>
+      <p class="msg" id="endMsg"></p>
+      <p class="weak" id="endWeak"></p>
+    </div>
+    <button class="big" id="btnNext">Weiter</button>
+    <button class="big ghost" id="btnHome">Zurück zur Auswahl</button>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var KEY = "elfmeter-einmaleins-v2";
+  var DAYNAMES = ["Mo","Di","Mi","Do","Fr"];
+
+  var store = load();
+  function load(){
+    var base = {stars:{}, runs:[], days:[]};
+    try{
+      var raw = localStorage.getItem(KEY);
+      if(raw){ var p = JSON.parse(raw); for(var k in base){ if(p[k]!==undefined) base[k]=p[k]; } }
+    }catch(e){}
+    return base;
+  }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+
+  var $ = function(id){ return document.getElementById(id); };
+  function shuffle(a){ for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;} return a; }
+  function rnd(n){ return Math.floor(Math.random()*n); }
+  function dayKey(d){ return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+  function weekKey(i){ var d=new Date(), wd=(d.getDay()+6)%7; d.setDate(d.getDate()-wd+i); return dayKey(d); }
+  function starStr(n){ return "★★★".slice(0,n)+"☆☆☆".slice(0,3-n); }
+
+  /* ---------- sound ---------- */
+  var actx=null;
+  function beep(f,d,t){
+    try{
+      if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+      var o=actx.createOscillator(), g=actx.createGain();
+      o.type=t||"triangle"; o.frequency.value=f;
+      g.gain.setValueAtTime(.0001,actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(.16,actx.currentTime+.01);
+      g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+d);
+      o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime+d+.02);
+    }catch(e){}
+  }
+  function cheer(){ beep(660,.1); setTimeout(function(){beep(880,.13);},95); setTimeout(function(){beep(1175,.2);},200); }
+  function boo(){ beep(190,.22,"sawtooth"); }
+  function tick(){ beep(1000,.03,"square"); }
+
+  /* ---------- questions ---------- */
+  // kind: mal | div | luecke | zehner
+  function mk(kind,a,b){
+    var p = a*b;
+    if(kind==="div")    return {kind:kind, text:p+" : "+a, answer:b, table:a};
+    if(kind==="luecke") return {kind:kind, text:a+" × ▢ = "+p, answer:b, table:a};
+    if(kind==="zehner"){
+      var z = Math.random()<.5 ? {t:a+" × "+(b*10), v:a*b*10} : {t:(a*10)+" × "+b, v:a*b*10};
+      return {kind:kind, text:z.t, answer:z.v, table:a};
+    }
+    return {kind:"mal", text:a+" × "+b, answer:p, table:a};
+  }
+  function anyQ(kinds, tables){
+    var a = tables[rnd(tables.length)];
+    var b = 2+rnd(9);                       // 2..10, keine ×1-Geschenke
+    return mk(kinds[rnd(kinds.length)], a, b);
+  }
+  function weakTables(){
+    var arr=[];
+    for(var i=2;i<=10;i++) arr.push({n:i,s:store.stars[i]||0});
+    arr.sort(function(x,y){ return x.s-y.s; });
+    return arr.map(function(o){return o.n;});
+  }
+
+  /* ---------- round ---------- */
+  var round=null, timer=null;
+
+  function buildRound(mode,n){
+    var qs=[], marks=[], i, w, kinds;
+    if(mode==="table"){
+      for(i=1;i<=10;i++) qs.push(mk("mal",n,i));
+      for(i=0;i<5;i++)  qs.push(mk("div",n,2+rnd(9)));
+      for(i=0;i<5;i++)  qs.push(mk("luecke",n,2+rnd(9)));
+      shuffle(qs);
+      round={mode:mode,n:n,qs:qs,marks:[],label:n+"er-Reihe",secs:0,phaseLab:"Reihe",phases:1};
+    } else if(mode==="cup"){
+      var all=[2,3,4,5,6,7,8,9,10];
+      for(i=0;i<15;i++) qs.push(anyQ(["mal"],all));
+      for(i=0;i<15;i++) qs.push(anyQ(["mal","div","luecke"],all));
+      for(i=0;i<15;i++) qs.push(anyQ(["mal","div","luecke","zehner","zehner"],all));
+      round={mode:mode,n:0,qs:qs,marks:[15,30],label:"Turnier",secs:22,phaseLab:"Halbzeit",phases:3};
+    } else {
+      w = weakTables().slice(0,6);
+      for(i=0;i<30;i++) qs.push(anyQ(["mal","mal","div","luecke","zehner"],w));
+      shuffle(qs);
+      round={mode:mode,n:0,qs:qs,marks:[],label:"Prüfung",secs:18,phaseLab:"Prüfung",phases:1};
+    }
+    round.i=0; round.goals=0; round.streak=0; round.best=0;
+    round.misses={}; round.tape=[]; round.phase=1; round.total=qs.length;
+    round.phaseStart=0; round.phaseGoals=0;
+  }
+
+  function startRound(mode,n){
+    buildRound(mode,n);
+    $("sGoals").textContent="0"; $("sStreak").textContent="0";
+    $("sPhase").textContent = round.mode==="cup" ? "1" : (round.mode==="table" ? round.n : "—");
+    $("sPhaseLab").textContent = round.phaseLab;
+    $("btnSpicker").style.display = (mode==="table") ? "" : "none";
+    $("spicker").className="spicker"; $("btnSpicker").setAttribute("aria-pressed","false");
+    if(mode==="table") buildSpicker(n);
+    $("clock").className = round.secs ? "clock" : "clock hidden";
+    show("game");
+    nextQuestion();
+  }
+
+  function buildSpicker(n){
+    var s=$("spicker"); s.innerHTML="";
+    for(var j=1;j<=10;j++){
+      var d=document.createElement("div");
+      d.innerHTML = n+" × "+j+" = <b>"+(n*j)+"</b>";
+      s.appendChild(d);
+    }
+  }
+
+  /* ---------- number pad ---------- */
+  var typed="";
+  function buildPad(){
+    var p=$("pad"); p.innerHTML="";
+    var keys=["1","2","3","4","5","6","7","8","9","←","0","OK"];
+    keys.forEach(function(k){
+      var b=document.createElement("button");
+      b.type="button";
+      b.className="key"+(k==="OK"?" go":"")+(k==="←"?" del":"");
+      b.textContent = k==="OK" ? "Schuss" : k;
+      b.onclick=function(){ press(k); };
+      p.appendChild(b);
+    });
+  }
+  function padEnabled(on){
+    var ks=$("pad").querySelectorAll(".key");
+    for(var i=0;i<ks.length;i++) ks[i].disabled=!on;
+  }
+  function press(k){
+    if(k==="←"){ typed=typed.slice(0,-1); paintTyped(); return; }
+    if(k==="OK"){ if(typed.length) submit(parseInt(typed,10)); return; }
+    if(typed.length<4){ typed+=k; tick(); paintTyped(); }
+  }
+  function paintTyped(){
+    var q=round.qs[round.i];
+    var shown = typed.length ? typed : "&nbsp;";
+    var cls = "typed"+(typed.length?"":" empty");
+    if(q.kind==="luecke"){
+      $("qTerm").innerHTML = q.text.replace("▢", '<span class="'+cls+'">'+shown+'</span>');
+    }else{
+      $("qTerm").innerHTML = q.text + ' = <span class="'+cls+'">'+shown+'</span>';
+    }
+  }
+
+  /* ---------- clock ---------- */
+  function startClock(){
+    var bar=$("clockBar");
+    if(!round.secs){ return; }
+    bar.className=""; bar.style.transition="none"; bar.style.width="100%";
+    void bar.offsetWidth;
+    bar.style.transition="width "+round.secs+"s linear, background .3s ease";
+    bar.style.width="0%";
+    timer=setTimeout(function(){ bar.className="warn"; submit(null); }, round.secs*1000);
+  }
+  function stopClock(){
+    if(timer){ clearTimeout(timer); timer=null; }
+    var bar=$("clockBar");
+    var w=getComputedStyle(bar).width;
+    bar.style.transition="none"; bar.style.width=w;
+  }
+
+  /* ---------- flow ---------- */
+  function nextQuestion(){
+    if(round.i>=round.qs.length){ finish(); return; }
+    if(round.marks.indexOf(round.i)>-1){ halftime(); return; }
+    typed="";
+    var q=round.qs[round.i];
+    $("qLabel").textContent="Schuss "+(round.i+1)+" von "+round.qs.length;
+    $("sLeft").textContent=round.qs.length-round.i;
+    paintTyped();
+    resetBall();
+    padEnabled(true);
+    startClock();
+  }
+
+  function resetBall(){
+    var b=$("ball");
+    b.style.transition="none"; b.style.transform="translate(-50%,0)";
+    void b.offsetWidth; b.style.transition="";
+    $("flash").className="flash";
+  }
+
+  function submit(value){
+    stopClock();
+    padEnabled(false);
+    var q=round.qs[round.i];
+    var ok = (value === q.answer);
+    var ball=$("ball"), flash=$("flash");
+
+    if(ok){
+      round.goals++; round.streak++; round.phaseGoals++;
+      if(round.streak>round.best) round.best=round.streak;
+      round.tape.push(1);
+      var dir = Math.random()<.5 ? -1 : 1;
+      ball.style.transform="translate(calc(-50% + "+(dir*98)+"px), -150px) rotate("+(dir*420)+"deg)";
+      flash.textContent = round.streak>=3 ? "SERIE ×"+round.streak+"!" : "TOR!";
+      flash.className="flash show";
+      cheer();
+    }else{
+      round.streak=0;
+      round.tape.push(0);
+      round.misses[q.table]=(round.misses[q.table]||0)+1;
+      round.qs.push(mk(q.kind==="zehner"?"mal":q.kind, q.table, 2+rnd(9)));
+      ball.style.transform="translate(-50%,-42px) rotate(120deg)";
+      flash.textContent = (value===null ? "ZU SPÄT · " : "") + q.answer;
+      flash.className="flash show miss";
+      boo();
+      $("qTerm").innerHTML = (q.kind==="luecke")
+        ? q.text.replace("▢",'<span class="typed">'+q.answer+'</span>')
+        : q.text+' = <span class="typed">'+q.answer+'</span>';
+    }
+    $("sGoals").textContent=round.goals;
+    $("sStreak").textContent=round.streak;
+    round.i++;
+    setTimeout(nextQuestion, ok?800:1900);
+  }
+
+  function halftime(){
+    round.marks.splice(round.marks.indexOf(round.i),1);
+    var done=round.phase, gained=round.phaseGoals, played=round.i-round.phaseStart;
+    round.phase++; round.phaseStart=round.i; round.phaseGoals=0;
+    $("sPhase").textContent=round.phase;
+    $("endTitle").textContent="Halbzeit "+done+" geschafft";
+    $("endScore").textContent=gained;
+    $("endOf").textContent="von "+played+" Schüssen in dieser Halbzeit";
+    $("endStars").textContent="";
+    paintTape();
+    $("endMsg").textContent = "Gesamt: "+round.goals+" Tore. Jetzt Halbzeit "+round.phase+" – es wird schwerer.";
+    $("endWeak").textContent = round.phase===2
+      ? "Neu: Geteilt-Aufgaben und Lücken (7 × ▢ = 56)."
+      : "Neu: Zehner – 7 × 40, 30 × 6.";
+    $("btnNext").innerHTML="Weiterspielen";
+    $("btnNext").dataset.act="resume";
+    show("end");
+  }
+
+  function paintTape(){
+    var t=$("endTape"); t.innerHTML="";
+    round.tape.slice(-45).forEach(function(v){
+      var i=document.createElement("i"); i.className=v?"hit":"missed"; t.appendChild(i);
+    });
+  }
+
+  function finish(){
+    var pct=Math.round(round.goals/round.qs.length*100);
+    var stars = pct>=90?3 : pct>=70?2 : 1;
+    if(round.mode==="table"){
+      var prev=store.stars[round.n]||0;
+      if(stars>prev) store.stars[round.n]=stars;
+    }
+    var tk=dayKey(new Date());
+    if(store.days.indexOf(tk)===-1) store.days.push(tk);
+    store.days=store.days.slice(-40);
+    var d=new Date();
+    store.runs.unshift({
+      date:("0"+d.getDate()).slice(-2)+"."+("0"+(d.getMonth()+1)).slice(-2)+".",
+      label:round.label, goals:round.goals, total:round.qs.length
+    });
+    store.runs=store.runs.slice(0,20);
+    save();
+
+    $("endScore").textContent=round.goals;
+    $("endOf").textContent="von "+round.qs.length+" Schüssen";
+    $("endStars").textContent=starStr(stars);
+    paintTape();
+    $("endTitle").textContent = pct>=90?"Pokal gewonnen!" : pct>=70?"Starkes Spiel!" : "Weitertrainieren!";
+    $("endMsg").textContent = "Beste Serie: "+round.best+" Tore hintereinander.";
+    var worst=null,max=0;
+    for(var k in round.misses){ if(round.misses[k]>max){ max=round.misses[k]; worst=k; } }
+    $("endWeak").innerHTML = worst
+      ? "Am schwersten war die <b>"+worst+"er-Reihe</b> – die als Nächstes trainieren."
+      : "Kein einziger Fehlschuss.";
+    $("btnNext").innerHTML="Noch eine Runde";
+    $("btnNext").dataset.act="again";
+    show("end");
+  }
+
+  /* ---------- screens ---------- */
+  function show(id){
+    ["start","game","end"].forEach(function(s){
+      $(s).className="screen"+(s===id?" on":"");
+    });
+    if(id==="start"){ paintDays(); paintTables(); paintRuns(); }
+    window.scrollTo(0,0);
+  }
+  function paintDays(){
+    var w=$("days"); w.innerHTML="";
+    for(var i=0;i<5;i++){
+      var done=store.days.indexOf(weekKey(i))>-1;
+      var d=document.createElement("div");
+      d.className="day"+(i===4?" test":"");
+      d.innerHTML='<div class="dot'+(done?" done":"")+'"></div><span>'+(i===4?"TEST":DAYNAMES[i])+'</span>';
+      w.appendChild(d);
+    }
+  }
+  function paintTables(){
+    var g=$("tableGrid"); g.innerHTML="";
+    for(var n=1;n<=10;n++){
+      (function(n){
+        var s=store.stars[n]||0;
+        var b=document.createElement("button");
+        b.className="tbl"+(s>=3?" mastered":"");
+        b.innerHTML=n+'<span class="stars">'+(s?starStr(s).slice(0,s):"")+'</span>';
+        b.setAttribute("aria-label",n+"er Reihe trainieren");
+        b.onclick=function(){ startRound("table",n); };
+        g.appendChild(b);
+      })(n);
+    }
+  }
+  function paintRuns(){
+    var ul=$("runs"); ul.innerHTML="";
+    if(!store.runs.length){ ul.innerHTML='<p class="empty">Noch keine Runde gespielt.</p>'; return; }
+    store.runs.slice(0,6).forEach(function(r){
+      var li=document.createElement("li");
+      li.innerHTML='<span>'+r.date+' · '+r.label+'</span><b>'+r.goals+'/'+r.total+'</b>';
+      ul.appendChild(li);
+    });
+  }
+
+  /* ---------- wiring ---------- */
+  $("btnCup").onclick=function(){ startRound("cup"); };
+  $("btnTest").onclick=function(){ startRound("exam"); };
+  $("btnQuit").onclick=function(){ stopClock(); show("start"); };
+  $("btnHome").onclick=function(){ show("start"); };
+  $("btnNext").onclick=function(){
+    if(this.dataset.act==="resume"){ show("game"); nextQuestion(); }
+    else { startRound(round.mode, round.n); }
+  };
+  $("btnSpicker").onclick=function(){
+    var s=$("spicker"), on=s.className.indexOf("on")===-1;
+    s.className="spicker"+(on?" on":"");
+    this.setAttribute("aria-pressed",on?"true":"false");
+  };
+  document.addEventListener("keydown",function(e){
+    if($("game").className.indexOf("on")===-1) return;
+    if(e.key>="0"&&e.key<="9") press(e.key);
+    else if(e.key==="Backspace"){ e.preventDefault(); press("←"); }
+    else if(e.key==="Enter") press("OK");
+  });
+
+  buildPad(); paintDays(); paintTables(); paintRuns();
+})();
+</script>
+
+</body>
+</html>

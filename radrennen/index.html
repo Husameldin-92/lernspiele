@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#241541">
+<title>Radrennen gegen Papa</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Titan+One&family=Nunito:wght@400;700;900&display=swap">
+<style>
+  :root{
+    --night:#241541;
+    --dusk:#4B2358;
+    --glow:#E8734A;
+    --sil:#150C2B;
+    --road:#2E2450;
+    --cream:#FCEFD9;
+    --muted:#B39ECB;
+    --kid:#FFD23F;
+    --kid-deep:#D9A400;
+    --papa:#E2483C;
+    --good:#5BD98A;
+    --r:18px;
+  }
+  *{box-sizing:border-box}
+  img{max-width:100%}
+  [hidden]{display:none!important}
+  html{background:#241541}
+  body{
+    margin:0;
+    background:linear-gradient(180deg,#1A0F33 0%,var(--night) 30%,var(--dusk) 70%,#6B3358 100%) fixed;
+    color:var(--cream);
+    font-family:"Nunito",ui-rounded,"Segoe UI",system-ui,sans-serif;
+    font-weight:700;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:480px;margin:0 auto;padding-inline:16px;padding-block:18px 40px}
+  h1{
+    font-family:"Titan One","Nunito",sans-serif;font-weight:400;
+    font-size:clamp(28px,9vw,40px);line-height:1;margin:0;
+    color:var(--kid);text-shadow:0 3px 0 rgba(0,0,0,.4);text-wrap:balance;
+  }
+  .sub{margin:8px 0 0;color:var(--muted);font-size:14px;font-weight:700}
+  .screen{display:none}
+  .screen.on{display:block}
+  h2.lbl{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+    margin:22px 0 10px;font-weight:900}
+
+  .pick{
+    width:100%;appearance:none;border:2px solid rgba(252,239,217,.18);
+    background:rgba(255,255,255,.06);color:var(--cream);border-radius:var(--r);
+    padding:14px 16px;margin-bottom:10px;cursor:pointer;text-align:left;
+    font-family:inherit;font-weight:900;font-size:17px;
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+    transition:transform .08s ease,background .15s ease,border-color .15s ease;
+  }
+  .pick:active{transform:translateY(3px)}
+  .pick small{display:block;font-weight:700;font-size:12.5px;color:var(--muted);margin-top:3px}
+  .pick .bike{font-size:20px;letter-spacing:-2px;color:var(--papa);flex:0 0 auto}
+  .pick.hard{border-color:var(--papa);background:rgba(226,72,60,.14)}
+  .pick.hard .t{color:#FFB3AC}
+  .pick.train{border-style:dashed}
+  .pick .t{font-family:"Titan One","Nunito",sans-serif;font-weight:400;font-size:18px}
+
+  .rows{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:4px}
+  .rw{appearance:none;border:2px solid rgba(252,239,217,.18);background:rgba(255,255,255,.05);
+    color:var(--muted);border-radius:12px;padding:11px 0;cursor:pointer;
+    font-family:inherit;font-weight:900;font-size:19px;font-variant-numeric:tabular-nums;
+    transition:border-color .15s ease,color .15s ease,background .15s ease}
+  .rw.on{color:#3A2A00;background:var(--kid);border-color:var(--kid)}
+  .rw:active{transform:translateY(2px)}
+
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .chip{
+    appearance:none;border:2px solid rgba(252,239,217,.18);background:rgba(255,255,255,.05);
+    color:var(--muted);border-radius:14px;padding:11px 10px;cursor:pointer;text-align:left;
+    font-family:inherit;font-weight:900;font-size:14px;line-height:1.2;
+    transition:border-color .15s ease,color .15s ease,background .15s ease;
+  }
+  .chip small{display:block;font-weight:700;font-size:11px;margin-top:4px;opacity:.85}
+  .chip.on{color:var(--kid);border-color:var(--kid);background:rgba(255,210,63,.12)}
+
+  .rec{display:flex;gap:10px;margin-top:6px}
+  .card{
+    flex:1;background:rgba(255,255,255,.06);border:2px solid rgba(252,239,217,.14);
+    border-radius:14px;padding:12px;text-align:center;
+  }
+  .card b{display:block;font-family:"Titan One",sans-serif;font-weight:400;font-size:24px;
+    color:var(--kid);font-variant-numeric:tabular-nums;line-height:1.1}
+  .card span{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:900}
+
+  .runs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+  .runs li{display:flex;justify-content:space-between;gap:10px;font-size:14px;color:var(--muted);
+    font-variant-numeric:tabular-nums}
+  .runs b{color:var(--cream);font-weight:900}
+  .empty{font-size:14px;color:var(--muted);font-weight:700;margin:0}
+
+  /* ---- track ---- */
+  .scene{position:relative;border-radius:var(--r);overflow:hidden;
+    border:2px solid rgba(252,239,217,.16);background:linear-gradient(180deg,#3A1F55 0%,#8A4A5E 62%,#E8734A 100%)}
+  .scene svg.sky{display:block;width:100%;height:auto}
+  .lanes{background:var(--road);padding:8px 0 6px;position:relative}
+  .lane{position:relative;height:34px}
+  .lane+.lane{border-top:2px dashed rgba(252,239,217,.22)}
+  .rider{
+    position:absolute;top:50%;left:0;transform:translate(0,-50%);
+    width:40px;height:30px;transition:left .45s cubic-bezier(.2,.7,.3,1);
+  }
+  .rider svg{width:100%;height:100%;display:block}
+  .tag{position:absolute;top:50%;transform:translateY(-50%);right:18px;
+    font-size:9px;font-weight:900;letter-spacing:.14em;color:rgba(179,158,203,.55)}
+  .goal{position:absolute;right:0;top:0;bottom:0;width:10px;
+    background:repeating-linear-gradient(45deg,#FCEFD9 0 5px,#241541 5px 10px);opacity:.85}
+
+  .marks{display:flex;justify-content:space-between;padding:6px 8px 0;
+    font-size:10px;letter-spacing:.04em;color:var(--muted);font-weight:900}
+  .marks span.now{color:var(--kid)}
+
+  .bubble{
+    position:absolute;right:10px;top:10px;max-width:70%;
+    background:rgba(20,10,35,.9);border:2px solid var(--papa);color:#FFD9D5;
+    border-radius:14px;padding:7px 12px;font-size:13px;font-weight:900;
+    opacity:0;transition:opacity .25s ease;pointer-events:none;
+  }
+  .bubble.show{opacity:1}
+
+  /* ---- question ---- */
+  .q{text-align:center;margin:14px 0 2px}
+  .q .lab{font-size:12px;color:var(--muted);font-weight:900;letter-spacing:.1em;
+    text-transform:uppercase;display:block;margin-bottom:6px}
+  .q .term{font-size:clamp(30px,10.5vw,44px);font-weight:900;line-height:1.1;
+    font-variant-numeric:tabular-nums;display:block}
+  .q .typed{color:var(--kid);border-bottom:4px solid var(--kid);min-width:1.6em;
+    display:inline-block;padding:0 .1em}
+  .q .typed.empty{border-bottom-color:rgba(255,210,63,.35)}
+  .q .typed.ok{color:var(--good);border-bottom-color:var(--good)}
+
+  .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+  .key{appearance:none;border:2px solid rgba(252,239,217,.18);background:rgba(255,255,255,.07);
+    color:var(--cream);border-radius:14px;padding:14px 0;cursor:pointer;font-family:inherit;
+    font-weight:900;font-size:24px;font-variant-numeric:tabular-nums;
+    transition:transform .07s ease,background .12s ease}
+  .key:active{transform:translateY(3px);background:rgba(255,255,255,.16)}
+  .key.go{background:var(--kid);color:#3A2A00;border-color:var(--kid);
+    font-family:"Titan One","Nunito",sans-serif;font-weight:400;font-size:17px}
+  .key.del{color:var(--muted);font-size:20px}
+  .key:disabled{opacity:.45;cursor:default}
+
+  .row{display:flex;gap:10px;margin-top:12px}
+  .mini{appearance:none;background:transparent;border:2px solid rgba(252,239,217,.2);
+    color:var(--muted);border-radius:12px;padding:9px 12px;cursor:pointer;
+    font-family:inherit;font-weight:900;font-size:13px;flex:1}
+  .mini[aria-pressed="true"]{color:var(--kid);border-color:var(--kid)}
+  .spicker{margin-top:12px;display:none;background:rgba(255,255,255,.05);
+    border:2px dashed rgba(252,239,217,.18);border-radius:14px;padding:12px;
+    grid-template-columns:1fr 1fr;gap:4px 14px;font-size:15px;
+    font-variant-numeric:tabular-nums;color:var(--muted)}
+  .spicker.on{display:grid}
+  .spicker b{color:var(--cream)}
+  .spicker h3{grid-column:1/-1;margin:2px 0 0;font-size:11px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--kid)}
+
+  /* ---- result ---- */
+  .medal{margin-top:14px;text-align:center;background:rgba(255,255,255,.06);
+    border:3px solid var(--kid);border-radius:var(--r);padding:22px 16px}
+  .medal.lost{border-color:var(--papa)}
+  .medal .place{font-family:"Titan One",sans-serif;font-size:40px;line-height:1.1;color:var(--kid)}
+  .medal.lost .place{color:#FF9E96}
+  .medal .line{margin-top:10px;font-size:15px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .medal .line b{color:var(--cream)}
+  .medal .say{margin-top:14px;font-size:16px;font-weight:900;text-wrap:balance}
+  .big{width:100%;margin-top:10px;appearance:none;border:0;border-radius:var(--r);
+    font-family:"Titan One","Nunito",sans-serif;font-weight:400;font-size:18px;padding:15px;
+    cursor:pointer;background:var(--kid);color:#3A2A00;box-shadow:0 6px 0 var(--kid-deep);
+    transition:transform .08s ease,box-shadow .08s ease}
+  .big:active{transform:translateY(4px);box-shadow:0 2px 0 var(--kid-deep)}
+  .big.ghost{background:transparent;color:var(--cream);border:2px solid rgba(252,239,217,.25);
+    box-shadow:none;font-family:"Nunito",sans-serif;font-weight:900;font-size:16px}
+
+  @media (prefers-reduced-motion: reduce){ .rider{transition:none} }
+  :focus-visible{outline:3px solid var(--kid);outline-offset:3px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ============ START ============ -->
+  <section id="start" class="screen on">
+    <h1>Radrennen<br>gegen Papa</h1>
+    <p class="sub" id="subLine">Quer durch Berlin bis zum Ziel.</p>
+
+    <h2 class="lbl">Welche Reihen?</h2>
+    <div class="rows" id="rowPick"></div>
+
+    <h2 class="lbl">Was wird gerechnet?</h2>
+    <div class="modes">
+      <button class="chip on" id="mMal">Nur Malnehmen<small>6 × 7 · 8 × 9 — wie im Test</small></button>
+      <button class="chip" id="mMix">Alles gemischt<small>auch 48 : 6 und 8 × ▢ = 56</small></button>
+    </div>
+
+    <h2 class="lbl">Gegen wen fährst du?</h2>
+    <button class="pick" data-lvl="1">
+      <span><span class="t">Papa nach dem Abendessen</span><small>Er tritt gemütlich. Gut zum Warmfahren.</small></span>
+      <span class="bike">●–●</span>
+    </button>
+    <button class="pick" data-lvl="2">
+      <span><span class="t">Papa im Trikot</span><small>Jetzt meint er es ernst.</small></span>
+      <span class="bike">●–●</span>
+    </button>
+    <button class="pick hard" data-lvl="3">
+      <span><span class="t">Husam-Modus</span><small>Papa gibt alles. Sehr schnell.</small></span>
+      <span class="bike">●–●</span>
+    </button>
+    <button class="pick train" data-lvl="0">
+      <span><span class="t">Training ohne Papa</span><small>24 Aufgaben in Ruhe, keiner jagt dich.</small></span>
+    </button>
+
+    <h2 class="lbl">Deine Bestmarken</h2>
+    <div class="rec">
+      <div class="card"><b id="cWins">0</b><span>Siege gegen Papa</span></div>
+      <div class="card"><b id="cBest">–</b><span>Beste Zeit</span></div>
+    </div>
+
+    <h2 class="lbl">Für Papa</h2>
+    <ul class="runs" id="runs"></ul>
+  </section>
+
+  <!-- ============ RACE ============ -->
+  <section id="race" class="screen">
+    <div class="scene">
+      <svg class="sky" viewBox="0 0 300 74" aria-hidden="true">
+        <circle cx="252" cy="52" r="15" fill="#FFD23F" opacity=".9"/>
+        <!-- Berlin silhouette -->
+        <g fill="#150C2B">
+          <rect x="0" y="52" width="300" height="22"/>
+          <!-- Fernsehturm -->
+          <rect x="46" y="20" width="4" height="34"/>
+          <circle cx="48" cy="26" r="7"/>
+          <path d="M44 14h8l-4-12z"/>
+          <!-- Blocks -->
+          <rect x="8" y="42" width="18" height="12"/>
+          <rect x="28" y="46" width="12" height="8"/>
+          <rect x="60" y="40" width="14" height="14"/>
+          <rect x="78" y="46" width="10" height="8"/>
+          <!-- Brandenburger Tor -->
+          <rect x="104" y="36" width="44" height="6"/>
+          <rect x="108" y="42" width="5" height="12"/><rect x="117" y="42" width="5" height="12"/>
+          <rect x="126" y="42" width="5" height="12"/><rect x="135" y="42" width="5" height="12"/>
+          <rect x="118" y="30" width="16" height="6"/>
+          <!-- Siegessäule -->
+          <rect x="176" y="24" width="5" height="30"/>
+          <circle cx="178.5" cy="20" r="4.5"/>
+          <rect x="170" y="50" width="17" height="4"/>
+          <!-- Dom -->
+          <rect x="206" y="42" width="20" height="12"/>
+          <path d="M206 42a10 10 0 0120 0z"/>
+          <rect x="232" y="46" width="12" height="8"/>
+          <rect x="264" y="44" width="16" height="10"/>
+          <rect x="284" y="48" width="14" height="6"/>
+        </g>
+      </svg>
+
+      <div class="lanes">
+        <div class="lane">
+          <span class="tag">DU</span>
+          <div class="rider" id="rKid">
+            <svg viewBox="0 0 40 30" aria-hidden="true">
+              <circle cx="9" cy="23" r="6" fill="none" stroke="#FCEFD9" stroke-width="2"/>
+              <circle cx="31" cy="23" r="6" fill="none" stroke="#FCEFD9" stroke-width="2"/>
+              <path d="M9 23l8-8h9l5 8" fill="none" stroke="#FFD23F" stroke-width="2.5"/>
+              <path d="M17 15l4 8" stroke="#FFD23F" stroke-width="2.5"/>
+              <path d="M20 13l5-5 6 2" fill="none" stroke="#FFD23F" stroke-width="2.5"/>
+              <circle cx="27" cy="5" r="4" fill="#FFD23F"/>
+            </svg>
+          </div>
+          <div class="goal"></div>
+        </div>
+        <div class="lane">
+          <span class="tag">PAPA</span>
+          <div class="rider" id="rPapa">
+            <svg viewBox="0 0 40 30" aria-hidden="true">
+              <circle cx="9" cy="23" r="6" fill="none" stroke="#FCEFD9" stroke-width="2"/>
+              <circle cx="31" cy="23" r="6" fill="none" stroke="#FCEFD9" stroke-width="2"/>
+              <path d="M9 23l8-8h9l5 8" fill="none" stroke="#E2483C" stroke-width="2.5"/>
+              <path d="M17 15l4 8" stroke="#E2483C" stroke-width="2.5"/>
+              <path d="M20 13l5-5 6 2" fill="none" stroke="#E2483C" stroke-width="2.5"/>
+              <circle cx="27" cy="5" r="4" fill="#E2483C"/>
+            </svg>
+          </div>
+          <div class="goal"></div>
+        </div>
+      </div>
+      <div class="bubble" id="bubble"></div>
+    </div>
+
+    <div class="marks" id="marks">
+      <span>Start</span><span>Fernsehturm</span><span>Brand. Tor</span><span>Siegessäule</span><span>Ziel</span>
+    </div>
+
+    <p class="q">
+      <span class="lab" id="qLab">Aufgabe 1</span>
+      <span class="term" id="qTerm"></span>
+    </p>
+
+    <div class="pad" id="pad"></div>
+
+    <div class="row">
+      <button class="mini" id="btnSpicker" aria-pressed="false">Spicker</button>
+      <button class="mini" id="btnQuit">Aufgeben</button>
+    </div>
+    <div class="spicker" id="spicker"></div>
+  </section>
+
+  <!-- ============ RESULT ============ -->
+  <section id="done" class="screen">
+    <h1 id="dTitle">Ziel!</h1>
+    <div class="medal" id="medal">
+      <div class="place" id="dPlace"></div>
+      <div class="line" id="dLine"></div>
+      <p class="say" id="dSay"></p>
+    </div>
+    <button class="big" id="btnAgain">Revanche</button>
+    <button class="big ghost" id="btnHome">Anderes Rennen</button>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var KEY="radrennen-papa-v1";
+  var SEG=24;                     // Streckenlänge in Feldern
+  var PACE=[0,8500,6200,4600];      // ms pro Papa-Tritt, Index = Level
+  var LVLNAME=["Training","Papa nach dem Abendessen","Papa im Trikot","Husam-Modus"];
+
+  var store=load();
+  function load(){
+    var base={wins:0,best:null,runs:[],mode:"mal",tables:[6,8]};
+    try{ var raw=localStorage.getItem(KEY);
+      if(raw){ var p=JSON.parse(raw); for(var k in base){ if(p[k]!==undefined) base[k]=p[k]; } }
+    }catch(e){}
+    return base;
+  }
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(store)); }catch(e){} }
+
+  var $=function(id){ return document.getElementById(id); };
+  function rnd(n){ return Math.floor(Math.random()*n); }
+  function fmt(ms){ var s=Math.round(ms/1000); return Math.floor(s/60)+":"+("0"+(s%60)).slice(-2); }
+
+  /* ---- sound ---- */
+  var actx=null;
+  function beep(f,d,t){
+    try{
+      if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
+      var o=actx.createOscillator(),g=actx.createGain();
+      o.type=t||"triangle"; o.frequency.value=f;
+      g.gain.setValueAtTime(.0001,actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(.15,actx.currentTime+.01);
+      g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+d);
+      o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime+d+.02);
+    }catch(e){}
+  }
+  function ping(){ beep(880,.1); }
+  function sprint(){ beep(880,.08); setTimeout(function(){beep(1320,.13);},80); }
+  function thud(){ beep(150,.2,"sawtooth"); }
+
+  /* ---- Aufgaben ---- */
+  // Kartenstapel: jede Aufgabe der gewählten Reihen kommt genau einmal dran,
+  // erst wenn der Stapel leer ist, wird neu gemischt.
+  var deck=[];
+  function fillDeck(){
+    var T=store.tables&&store.tables.length?store.tables:[6,8];
+    deck=[];
+    T.forEach(function(a){ for(var b=1;b<=10;b++) deck.push([a,b]); });
+    for(var i=deck.length-1;i>0;i--){ var j=rnd(i+1),t=deck[i]; deck[i]=deck[j]; deck[j]=t; }
+  }
+  function newQ(){
+    if(!deck.length) fillDeck();
+    var card=deck.shift(), a=card[0], b=card[1];
+    var kind = (store.mode==="mal") ? "mal" : ["mal","mal","mal","div","luecke","zehner"][rnd(6)];
+    if(kind!=="mal" && b===1) kind="mal";   // 6 : 6 und 6 × ▢ = 6 bringen nichts
+    if(kind==="div")    return {text:(a*b)+" : "+a, answer:b, card:card};
+    if(kind==="luecke") return {text:a+" × ▢ = "+(a*b), answer:b, gap:true, card:card};
+    if(kind==="zehner") return Math.random()<.5
+        ? {text:a+" × "+(b*10), answer:a*b*10, card:card}
+        : {text:(a*10)+" × "+b, answer:a*b*10, card:card};
+    return Math.random()<.5 ? {text:a+" × "+b, answer:a*b, card:card}
+                            : {text:b+" × "+a, answer:a*b, card:card};
+  }
+
+  /* ---- Zustand ---- */
+  var g=null, papaTimer=null, qStart=0, typed="";
+
+  function startRace(lvl){
+    fillDeck();
+    g={lvl:lvl, kid:0, papa:0, n:0, right:0, t0:Date.now(), over:false};
+    place($("rKid"),0); place($("rPapa"),0);
+    $("rPapa").parentNode.style.opacity = lvl ? "1" : ".35";
+    buildSpicker();
+    $("spicker").className="spicker"; $("btnSpicker").setAttribute("aria-pressed","false");
+    bubble("");
+    show("race");
+    nextQ();
+    if(lvl) papaTimer=setInterval(papaStep, PACE[lvl]);
+  }
+
+  function place(el,pos){
+    var pct = pos/SEG;
+    el.style.left = "calc("+(pct*100)+"% - "+(pct*44)+"px)";
+  }
+
+  function papaStep(){
+    if(g.over) return;
+    g.papa++;
+    place($("rPapa"),g.papa);
+    if(g.papa===g.kid+1 && g.papa<SEG) bubble(pick(["Papa: Ich bin vorbei!","Papa: Tempo, Tempo!","Papa: Das Trikot sitzt."]));
+    if(g.papa>=SEG){ finish(false); }
+  }
+  function pick(a){ return a[rnd(a.length)]; }
+  function bubble(txt){
+    var b=$("bubble");
+    if(!txt){ b.className="bubble"; return; }
+    b.textContent=txt; b.className="bubble show";
+    setTimeout(function(){ b.className="bubble"; },2200);
+  }
+
+  function nextQ(){
+    if(g.over) return;
+    if(!g.lvl && g.n>=SEG){ finish(true); return; }
+    typed=""; g.q=newQ(); g.n++;
+    $("qLab").textContent = g.lvl ? ("Aufgabe "+g.n+" · noch "+(SEG-g.kid)+" Felder")
+                                  : ("Aufgabe "+g.n+" von "+SEG);
+    paintTyped();
+    padOn(true);
+    qStart=Date.now();
+  }
+
+  function paintTyped(cls){
+    var shown = typed.length?typed:"&nbsp;";
+    var c = "typed"+(cls?(" "+cls):(typed.length?"":" empty"));
+    $("qTerm").innerHTML = g.q.gap
+      ? g.q.text.replace("▢",'<span class="'+c+'">'+shown+'</span>')
+      : g.q.text+' = <span class="'+c+'">'+shown+'</span>';
+  }
+
+  /* ---- Ziffernblock ---- */
+  function buildPad(){
+    var p=$("pad"); p.innerHTML="";
+    ["1","2","3","4","5","6","7","8","9","←","0","OK"].forEach(function(k){
+      var b=document.createElement("button");
+      b.type="button";
+      b.className="key"+(k==="OK"?" go":"")+(k==="←"?" del":"");
+      b.textContent = k==="OK"?"Tritt!":k;
+      b.onclick=function(){ press(k); };
+      p.appendChild(b);
+    });
+  }
+  function padOn(on){
+    var ks=$("pad").querySelectorAll(".key");
+    for(var i=0;i<ks.length;i++) ks[i].disabled=!on;
+  }
+  function press(k){
+    if(g.over) return;
+    if(k==="←"){ typed=typed.slice(0,-1); paintTyped(); return; }
+    if(k==="OK"){ if(typed.length) submit(); return; }
+    if(typed.length<4){ typed+=k; paintTyped(); }
+  }
+
+  function submit(){
+    var val=parseInt(typed,10), fast=(Date.now()-qStart)<5000;
+    padOn(false);
+    if(val===g.q.answer){
+      g.right++;
+      var step = fast?2:1;
+      g.kid=Math.min(SEG,g.kid+step);
+      place($("rKid"),g.kid);
+      paintTyped("ok");
+      if(fast){ sprint(); bubble("Sprint! Zwei Felder."); } else ping();
+      if(g.lvl && g.kid>=SEG){ finish(true); return; }
+      setTimeout(nextQ,520);
+    }else{
+      thud();
+      $("qTerm").innerHTML = g.q.gap
+        ? g.q.text.replace("▢",'<span class="typed">'+g.q.answer+'</span>')
+        : g.q.text+' = <span class="typed">'+g.q.answer+'</span>';
+      if(g.q.card) deck.splice(rnd(deck.length+1),0,g.q.card);   // kommt noch mal dran
+      bubble(g.lvl ? "Falsch – Papa holt auf." : "Falsch. Merk dir die Zahl.");
+      setTimeout(nextQ,1900);
+    }
+  }
+
+  function finish(won){
+    g.over=true;
+    if(papaTimer){ clearInterval(papaTimer); papaTimer=null; }
+    padOn(false);
+    var ms=Date.now()-g.t0;
+    var quote=Math.round(g.right/g.n*100);
+
+    if(g.lvl && won){
+      store.wins++;
+      if(store.best===null || ms<store.best) store.best=ms;
+    }
+    store.runs.unshift({
+      d:new Date().getDate()+"."+(new Date().getMonth()+1)+".",
+      lvl:LVLNAME[g.lvl], won:won, right:g.right, n:g.n, t:fmt(ms)
+    });
+    store.runs=store.runs.slice(0,20);
+    save();
+
+    $("medal").className = "medal"+((g.lvl&&!won)?" lost":"");
+    if(!g.lvl){
+      $("dTitle").textContent="Training fertig";
+      $("dPlace").textContent=g.right+" / "+g.n;
+      $("dSay").textContent="Richtig gerechnet: "+quote+" %. Jetzt gegen Papa?";
+    }else if(won){
+      $("dTitle").textContent="Du hast gewonnen!";
+      $("dPlace").textContent="1. Platz";
+      $("dSay").textContent = g.lvl===3
+        ? "Du hast den Husam-Modus geschlagen. Papa braucht jetzt eine Pause."
+        : pick(["Papa schiebt sein Rad nach Hause.","Papa sagt, die Kette war schuld.","Papa will Revanche. Natürlich."]);
+    }else{
+      $("dTitle").textContent="Papa war schneller";
+      $("dPlace").textContent="2. Platz";
+      $("dSay").textContent=pick(["Knapp. Noch mal.","Papa grinst. Das musst du ändern.","Beim nächsten Mal."]);
+    }
+    $("dLine").innerHTML = "Zeit <b>"+fmt(ms)+"</b> · richtig <b>"+g.right+" von "+g.n+"</b>"
+      + (g.lvl?(" · Gegner <b>"+LVLNAME[g.lvl]+"</b>"):"");
+    show("done");
+  }
+
+  function buildSpicker(){
+    var s=$("spicker"); s.innerHTML="";
+    (store.tables.length?store.tables:[6,8]).forEach(function(a){
+      var h=document.createElement("h3"); h.textContent=a+"er-Reihe"; s.appendChild(h);
+      for(var j=1;j<=10;j++){
+        var d=document.createElement("div");
+        d.innerHTML=a+" × "+j+" = <b>"+(a*j)+"</b>";
+        s.appendChild(d);
+      }
+    });
+  }
+
+  /* ---- Bildschirme ---- */
+  function show(id){
+    ["start","race","done"].forEach(function(s){
+      $(s).className="screen"+(s===id?" on":"");
+    });
+    if(id==="start") paintStart();
+    window.scrollTo(0,0);
+  }
+  function paintMode(){
+    $("mMal").className = "chip"+(store.mode==="mal"?" on":"");
+    $("mMix").className = "chip"+(store.mode==="mix"?" on":"");
+  }
+  function paintRows(){
+    var box=$("rowPick"); box.innerHTML="";
+    for(var n=1;n<=10;n++){
+      (function(n){
+        var b=document.createElement("button");
+        b.type="button";
+        b.className="rw"+(store.tables.indexOf(n)>-1?" on":"");
+        b.textContent=n;
+        b.setAttribute("aria-pressed", store.tables.indexOf(n)>-1?"true":"false");
+        b.onclick=function(){
+          var i=store.tables.indexOf(n);
+          if(i>-1){ if(store.tables.length>1) store.tables.splice(i,1); }
+          else store.tables.push(n);
+          store.tables.sort(function(x,y){return x-y;});
+          save(); paintRows(); paintSub();
+        };
+        box.appendChild(b);
+      })(n);
+    }
+  }
+  function paintSub(){
+    var t=store.tables;
+    var list = t.length===1 ? (t[0]+"er-Reihe") : (t.slice(0,-1).join("er, ")+"er und "+t[t.length-1]+"er-Reihe");
+    $("subLine").textContent = list+" – jede Aufgabe kommt einmal dran, dann wird neu gemischt.";
+  }
+  function paintStart(){
+    paintMode(); paintRows(); paintSub();
+    $("cWins").textContent=store.wins;
+    $("cBest").textContent=store.best?fmt(store.best):"–";
+    var ul=$("runs"); ul.innerHTML="";
+    if(!store.runs.length){ ul.innerHTML='<p class="empty">Noch kein Rennen gefahren.</p>'; return; }
+    store.runs.slice(0,6).forEach(function(r){
+      var li=document.createElement("li");
+      li.innerHTML='<span>'+r.d+' · '+r.lvl+'</span><b>'+(r.lvl==="Training"?(r.right+"/"+r.n):(r.won?"gewonnen":"verloren"))+' · '+r.t+'</b>';
+      ul.appendChild(li);
+    });
+  }
+
+  /* ---- Verdrahtung ---- */
+  var picks=document.querySelectorAll(".pick");
+  for(var i=0;i<picks.length;i++){
+    (function(btn){
+      btn.onclick=function(){ startRace(parseInt(btn.dataset.lvl,10)); };
+    })(picks[i]);
+  }
+  $("mMal").onclick=function(){ store.mode="mal"; save(); paintMode(); };
+  $("mMix").onclick=function(){ store.mode="mix"; save(); paintMode(); };
+  $("btnQuit").onclick=function(){ if(papaTimer) clearInterval(papaTimer); papaTimer=null; if(g) g.over=true; show("start"); };
+  $("btnHome").onclick=function(){ show("start"); };
+  $("btnAgain").onclick=function(){ startRace(g.lvl); };
+  $("btnSpicker").onclick=function(){
+    var s=$("spicker"), on=s.className.indexOf("on")===-1;
+    s.className="spicker"+(on?" on":"");
+    this.setAttribute("aria-pressed",on?"true":"false");
+  };
+  document.addEventListener("keydown",function(e){
+    if($("race").className.indexOf("on")===-1) return;
+    if(e.key>="0"&&e.key<="9") press(e.key);
+    else if(e.key==="Backspace"){ e.preventDefault(); press("←"); }
+    else if(e.key==="Enter") press("OK");
+  });
+
+  buildPad(); paintStart();
+})();
+</script>
+
+</body>
+</html>
