@@ -12,7 +12,7 @@ Sammlung:
 - **Elfmeter-Einmaleins** — https://husameldin-92.github.io/lernspiele/elfmeter/
 - **Radrennen gegen Papa** — https://husameldin-92.github.io/lernspiele/radrennen/
 
-Private Übersicht, ⛔ nicht an die Klasse: https://husameldin-92.github.io/lernspiele/
+Übersicht: https://husameldin-92.github.io/lernspiele/
 
 *(Die vollen Adressen stehen hier zum Kopieren. Sie gelten, solange das Repo auf GitHub Pages
 liegt — käme später eine eigene Domain dazu, ist dieser Block die einzige Stelle im Repo, die
