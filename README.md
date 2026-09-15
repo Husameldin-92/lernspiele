@@ -4,10 +4,19 @@ Kleine Mathe-Lernspiele für meine Kinder. Link öffnen, spielen, fertig — ohn
 Anmeldung. Ein Spiel = ein Ordner = eine HTML-Datei, ausgeliefert über GitHub Pages.
 Kein Build, kein Server, kein Konto.
 
-Live: https://husameldin-92.github.io/lernspiele/
+## Adressen zum Verschicken
 
-`index.html` im Wurzelverzeichnis ist die private Übersicht. Verschickt wird immer nur die
-Adresse eines einzelnen Spiels, nie die Sammlung.
+Jedes Spiel hat seine eigene Adresse. Verschickt wird immer **ein Spiel einzeln**, nie die
+Sammlung:
+
+- **Elfmeter-Einmaleins** — https://husameldin-92.github.io/lernspiele/elfmeter/
+- **Radrennen gegen Papa** — https://husameldin-92.github.io/lernspiele/radrennen/
+
+Private Übersicht, ⛔ nicht an die Klasse: https://husameldin-92.github.io/lernspiele/
+
+*(Die vollen Adressen stehen hier zum Kopieren. Sie gelten, solange das Repo auf GitHub Pages
+liegt — käme später eine eigene Domain dazu, ist dieser Block die einzige Stelle im Repo, die
+angepasst werden muss.)*
 
 ## Verzeichnisbaum
 
@@ -39,7 +48,9 @@ lernspiele/
    laufen über die Werkstatt, nicht über dieses Repo.
 3. **Kachel in der Übersicht `index.html` ergänzen:** Titel, Fach, Klasse, ein Satz zum Spiel,
    Link auf `./<ordner>/`.
-4. **Committen und pushen.**
+4. **In dieser README nachtragen:** die volle Adresse oben unter „Adressen zum Verschicken"
+   und eine Zeile in der Spiele-Tabelle.
+5. **Committen und pushen.**
 
 ```
 git add <ordner> index.html
@@ -60,8 +71,10 @@ erst der Push (plus ein, zwei Minuten Build) macht die neue Adresse erreichbar.
   auch Monate später. Umbenennen ist hier kein Refactoring, sondern ein kaputter Link.
 - Neue Fassung eines Spiels: Datei im bestehenden Ordner ersetzen, Ordnername und Adresse
   bleiben.
-- Links im Repo immer **relativ** (`./elfmeter/`), nie absolut. So läuft die Sammlung unter
-  GitHub Pages, unter einer eigenen Domain und per `file://` gleich.
+- Links **zwischen den Seiten** (also die Kacheln in `index.html`) immer **relativ**
+  (`./elfmeter/`), nie absolut. So läuft die Sammlung unter GitHub Pages, unter einer eigenen
+  Domain und per `file://` gleich. Die vollen Adressen oben sind die Ausnahme — sie stehen zum
+  Kopieren da, nicht zum Navigieren.
 
 ## Spielstände
 
