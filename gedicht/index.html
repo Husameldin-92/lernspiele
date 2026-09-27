@@ -309,6 +309,7 @@ const WD = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 const WDL = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
 const SPK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 const SPK_OFF = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M17 9l5 6M22 9l-5 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const SILENT_WAV = 'data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
 const CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 /* A public-domain example (Johann Gaudenz von Salis-Seewis, 1782), shown until a poem is added. */
@@ -475,16 +476,27 @@ function addLog(e){ const p = loadProg(); e.t = Date.now(); p.log.unshift(e); p.
 
 /* ---------- speech ---------- */
 const TTS = {
-  ok:false, on:true, voice:null, n:0,
+  ok:false, on:true, voice:null, n:0, unlocked:false,
   init(){
     this.ok = ('speechSynthesis' in window) && typeof window.SpeechSynthesisUtterance === 'function';
     if(store.get('gb.snd') === false) this.on = false;
     if(!this.ok) return;
     this.pick();
     try{ speechSynthesis.addEventListener('voiceschanged', () => this.pick()); }catch(e){}
-    const unlock = () => { try{ const u = new SpeechSynthesisUtterance(' '); u.volume = 0; u.lang='de-DE'; speechSynthesis.speak(u); }catch(e){} };
-    document.addEventListener('pointerdown', unlock, {once:true});
+    /* iPhone: speech must be unlocked inside a real tap (click/touchend, not pointerdown), and a short silent
+       clip switches the phone to media playback so the silent switch doesn't mute the voice. */
+    const unlock = () => {
+      if(this.unlocked) return; this.unlocked = true;
+      try{ if(navigator.audioSession) navigator.audioSession.type = 'playback'; }catch(e){}
+      try{ const a = new Audio(SILENT_WAV); a.setAttribute('playsinline',''); const pr = a.play(); if(pr && pr.catch) pr.catch(()=>{}); }catch(e){}
+      try{ const u = new SpeechSynthesisUtterance(' '); u.volume = 0; u.lang = 'de-DE'; speechSynthesis.speak(u); }catch(e){}
+    };
+    ['touchend','click','keydown'].forEach(ev => document.addEventListener(ev, unlock, {capture:true}));
+    document.addEventListener('visibilitychange', () => {
+      if(document.visibilityState === 'visible'){ this.unlocked = false; try{ speechSynthesis.cancel(); }catch(e){} }
+    });
   },
+  busy(){ try{ return speechSynthesis.speaking || speechSynthesis.pending; }catch(e){ return false; } },
   pick(){
     try{
       const de = (speechSynthesis.getVoices()||[]).filter(v => /^de([-_]|$)/i.test(v.lang));
@@ -492,7 +504,7 @@ const TTS = {
     }catch(e){}
   },
   live(){ return this.ok && this.on; },
-  stop(){ this.n++; try{ speechSynthesis.cancel(); }catch(e){} },
+  stop(){ this.n++; try{ if(this.busy()) speechSynthesis.cancel(); }catch(e){} },
   one(text, o){
     return new Promise(res => {
       let done = false; const fin = () => { if(!done){ done = true; res(); } };
@@ -508,8 +520,10 @@ const TTS = {
   },
   async run(items, o, onEach){
     if(!this.live()) return;
+    const wasBusy = this.busy();
     this.stop(); const my = this.n;
-    await new Promise(r => setTimeout(r, 60));
+    if(wasBusy) await new Promise(r => setTimeout(r, 90));
+    try{ if(speechSynthesis.paused) speechSynthesis.resume(); }catch(e){}
     for(let i=0;i<items.length;i++){
       if(my !== this.n) return;
       onEach && onEach(i);
