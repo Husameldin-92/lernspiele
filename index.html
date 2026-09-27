@@ -127,6 +127,13 @@
     --spiel-leise:  #B39ECB;
   }
 
+  .kachel--gedicht {
+    --spiel-bg:     #1D2A44;
+    --spiel-akzent: #FFE789;
+    --spiel-text:   #F1F5FA;
+    --spiel-leise:  #C6D8EA;
+  }
+
   .kachel {
     display: flex;
     flex: 1;
@@ -302,6 +309,24 @@
           <p class="kachel__thema">Einmaleins, Division, Platzhalter- und Zehneraufgaben</p>
           <span class="kachel__adresse">
             ./radrennen/
+            <span class="kachel__pfeil" aria-hidden="true">&rarr;</span>
+          </span>
+        </a>
+      </li>
+
+      <li>
+        <a class="kachel kachel--gedicht" href="./gedicht/">
+          <h3 class="kachel__name">Gedicht-Baum</h3>
+          <ul class="marken">
+            <li class="marke marke--fach">Deutsch</li>
+            <li class="marke">Klasse 3c</li>
+          </ul>
+          <p class="kachel__satz">
+            Gedichte auswendig lernen, Stück für Stück mit Tagesplan bis zum Aufsagen.
+          </p>
+          <p class="kachel__thema">Gedichte auswendig lernen</p>
+          <span class="kachel__adresse">
+            ./gedicht/
             <span class="kachel__pfeil" aria-hidden="true">&rarr;</span>
           </span>
         </a>

@@ -38,6 +38,7 @@ lernspiele/
 | --- | --- | --- | --- |
 | Elfmeter-Einmaleins | Mathe | Klasse 2-3 | `./elfmeter/` |
 | Radrennen gegen Papa | Mathe | Klasse 2-3 (Mix-Modus bis Klasse 4) | `./radrennen/` |
+| Gedicht-Baum | Deutsch | Klasse 3c | `./gedicht/` |
 
 ## Ein neues Spiel dazu
 
