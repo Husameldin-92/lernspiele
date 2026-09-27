@@ -11,6 +11,7 @@ Sammlung:
 
 - **Elfmeter-Einmaleins** — https://husameldin-92.github.io/lernspiele/elfmeter/
 - **Radrennen gegen Papa** — https://husameldin-92.github.io/lernspiele/radrennen/
+- **Gedicht-Baum** — https://husameldin-92.github.io/lernspiele/gedicht/
 
 Übersicht: https://husameldin-92.github.io/lernspiele/
 
