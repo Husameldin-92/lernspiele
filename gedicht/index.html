@@ -199,7 +199,6 @@ h1,h2,h3,p{margin:0}
       <div class="copyrow" style="margin-top:8px"><input id="shareUrl" readonly aria-label="Link für die Klasse"><button type="button" id="copyBtn" class="btn primary slim">Kopieren</button></div>
       <p id="copyMsg" class="small" hidden></p>
     </div>
-    <label class="toggle" for="arToggle"><input type="checkbox" id="arToggle">Wörter auch auf Arabisch erklären</label>
     <div>
       <p class="small">Zuletzt gespielt (nur auf diesem Gerät):</p>
       <ol id="log" class="log"></ol>
@@ -289,7 +288,6 @@ h1,h2,h3,p{margin:0}
   </div>
   <div class="row">
     <button type="button" id="wcSay" class="btn slim"></button>
-    <button type="button" id="wcAr" class="btn slim">عربي</button>
     <button type="button" id="wcClose" class="btn slim primary">OK</button>
   </div>
 </div>
@@ -666,13 +664,12 @@ function showHome(){
   m += `<button type="button" class="btn" data-go="probe"><span>Aufsagen-Probe</span></button>`;
   $('modes').innerHTML = m;
 
-  $('shareBox').hidden = P.demo;
+  $('shareBox').hidden = P.demo || !!store.get('gb.fromLink');
   if(!P.demo){
     $('shareUrl').value = SHARE_BASE ? SHARE_BASE + '#' + makeToken(P) : 'Der Link ist gleich fertig.';
     $('copyBtn').disabled = !SHARE_BASE;
     $('copyMsg').hidden = true;
   }
-  $('arToggle').checked = !!store.get('gb.ar');
   $('editBtn').textContent = P.demo ? 'Euer Gedicht einfügen' : 'Gedicht ändern';
 
   const log = prog.log || [];
@@ -717,7 +714,7 @@ function openWord(w, spanEl){
   $('wcW').textContent = w;
   $('wcD').textContent = d.de;
   $('wcA').textContent = d.ar;
-  $('wcA').hidden = !store.get('gb.ar');
+  $('wcA').hidden = true;
   $('wcSay').innerHTML = SPK + '<span>Anhören</span>';
   $('wcSay').hidden = !TTS.live();
   $('wcard').hidden = false;
@@ -1126,6 +1123,7 @@ $('saveBtn').addEventListener('click', () => {
   const text = $('inText').value.trim();
   if(!parsePoem(text).length) return;
   if(setPoem({title:$('inTitle').value, date:$('inDate').value, text}, true)){
+    store.set('gb.fromLink', false);
     showHome();
     const sb = $('shareBox'); if(sb && !sb.hidden) setTimeout(() => sb.scrollIntoView({behavior:REDUCE?'auto':'smooth', block:'center'}), 150);
   }
@@ -1136,10 +1134,8 @@ $('copyBtn').addEventListener('click', () => {
   const fallback = () => { $('shareUrl').focus(); $('shareUrl').select(); msg.hidden = false; msg.textContent = 'Der Link ist markiert. Bitte kopieren.'; };
   try{ if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(u).then(ok, fallback); else fallback(); }catch(e){ fallback(); }
 });
-$('arToggle').addEventListener('change', e => store.set('gb.ar', e.target.checked));
 $('wcClose').addEventListener('click', closeWord);
 $('wcSay').addEventListener('click', () => { if(WC) TTS.say(WC, {rate:.7}); });
-$('wcAr').addEventListener('click', () => { const on = !store.get('gb.ar'); store.set('gb.ar', on); $('wcA').hidden = !on; });
 $('lPlay').addEventListener('click', () => { addLog({kind:'listen'}); karaoke(P.stanzas.flat(), $('lBody')); });
 $('sndBtn').addEventListener('click', () => { TTS.on = !TTS.on; store.set('gb.snd', TTS.on); if(!TTS.on) TTS.stop(); paintSnd(); const t = G && cur(); if(t && !['puzzle','ordnen','folge'].includes(t.type)) render(); });
 $('againBtn').addEventListener('click', () => { if(LAST) startGame(LAST.mode, LAST.s); });
@@ -1157,7 +1153,9 @@ function loadFromHash(){
   const h = (location.hash || '').slice(1);
   if(!h) return false;
   const p = readToken(h);
-  return !!(p && setPoem(p, true));
+  const ok = !!(p && setPoem(p, true));
+  if(ok) store.set('gb.fromLink', true);
+  return ok;
 }
 function init(){
   TTS.init();
