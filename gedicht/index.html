@@ -141,6 +141,7 @@ h1,h2,h3,p{margin:0}
 .vchip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ochre);background:var(--ochre-wash);color:var(--ink);border-radius:999px;padding:6px 12px;font-weight:700;cursor:pointer;min-height:40px}
 
 /* Word card */
+.sndhint{position:fixed;left:12px;right:12px;top:calc(12px + env(safe-area-inset-top,0px));z-index:40;margin:0 auto;max-width:456px;padding:12px 14px;border-radius:14px;background:var(--ink);color:#fff;font-size:.95rem;line-height:1.35;box-shadow:0 10px 26px -10px rgba(29,42,68,.6)}
 .wcard{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--sheet);border-top:3px solid var(--ochre);box-shadow:0 -12px 30px -14px rgba(29,42,68,.45);padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
 .wcard .in{max-width:560px;margin-inline:auto;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
 .wc-e{font-size:3.1rem;line-height:1}
@@ -520,6 +521,7 @@ const TTS = {
   },
   async run(items, o, onEach){
     if(!this.live()) return;
+    sndHint();
     const wasBusy = this.busy();
     this.stop(); const my = this.n;
     if(wasBusy) await new Promise(r => setTimeout(r, 90));
@@ -534,6 +536,19 @@ const TTS = {
   },
   say(text, o){ return this.run([text], o); }
 };
+
+/* iPhone: the silent switch mutes the reading voice and a web page cannot override it, so say so once per visit. */
+const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+let hintShown = false;
+function sndHint(){
+  if(!IOS || hintShown) return; hintShown = true;
+  const h = document.createElement('div');
+  h.className = 'sndhint'; h.setAttribute('role','status');
+  h.textContent = '🔇 Kein Ton? Stummmodus am iPhone ausschalten und lauter stellen.';
+  const off = () => h.remove();
+  h.addEventListener('click', off); setTimeout(off, 7000);
+  document.body.appendChild(h);
+}
 
 /* ---------- tree ---------- */
 const NS = 'http://www.w3.org/2000/svg';
