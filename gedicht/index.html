@@ -192,11 +192,10 @@ h1,h2,h3,p{margin:0}
   <div class="treebox"><svg id="homeTree" viewBox="0 0 300 262" role="img" aria-label="Der Gedicht-Baum"></svg><p id="treeCap" class="treecap"></p></div>
   <button type="button" id="recBtn" class="btn primary rec"></button>
   <div class="modes" id="modes"></div>
-  <section class="sheet parents" aria-label="Für Mama und Papa">
+  <section id="parents" class="sheet parents" aria-label="Für Mama und Papa">
     <h2 class="h2">Für Mama &amp; Papa</h2>
     <div id="shareBox">
-      <p class="small">Diesen Link in die Eltern-Gruppe schicken. Das Gedicht ist schon drin, die Kinder müssen nichts tippen.</p>
-      <div class="copyrow" style="margin-top:8px"><input id="shareUrl" readonly aria-label="Link für die Klasse"><button type="button" id="copyBtn" class="btn primary slim">Kopieren</button></div>
+      <div class="copyrow"><input id="shareUrl" readonly aria-label="Link für die Klasse"><button type="button" id="copyBtn" class="btn primary slim">Kopieren</button></div>
       <p id="copyMsg" class="small" hidden></p>
     </div>
     <div>
@@ -664,7 +663,9 @@ function showHome(){
   m += `<button type="button" class="btn" data-go="probe"><span>Aufsagen-Probe</span></button>`;
   $('modes').innerHTML = m;
 
-  $('shareBox').hidden = P.demo || !!store.get('gb.fromLink');
+  /* Only the person who typed the poem in gets this section; everyone opening the link just gets the poem. */
+  $('parents').hidden = !P.demo && !store.get('gb.owner');
+  $('shareBox').hidden = P.demo;
   if(!P.demo){
     $('shareUrl').value = SHARE_BASE ? SHARE_BASE + '#' + makeToken(P) : 'Der Link ist gleich fertig.';
     $('copyBtn').disabled = !SHARE_BASE;
@@ -1123,14 +1124,14 @@ $('saveBtn').addEventListener('click', () => {
   const text = $('inText').value.trim();
   if(!parsePoem(text).length) return;
   if(setPoem({title:$('inTitle').value, date:$('inDate').value, text}, true)){
-    store.set('gb.fromLink', false);
+    store.set('gb.owner', true);
     showHome();
     const sb = $('shareBox'); if(sb && !sb.hidden) setTimeout(() => sb.scrollIntoView({behavior:REDUCE?'auto':'smooth', block:'center'}), 150);
   }
 });
 $('copyBtn').addEventListener('click', () => {
   const u = $('shareUrl').value, msg = $('copyMsg');
-  const ok = () => { msg.hidden = false; msg.textContent = 'Kopiert. Jetzt in die Eltern-Gruppe einfügen.'; };
+  const ok = () => { msg.hidden = false; msg.textContent = 'Kopiert.'; };
   const fallback = () => { $('shareUrl').focus(); $('shareUrl').select(); msg.hidden = false; msg.textContent = 'Der Link ist markiert. Bitte kopieren.'; };
   try{ if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(u).then(ok, fallback); else fallback(); }catch(e){ fallback(); }
 });
@@ -1152,9 +1153,9 @@ $('quitBtn').addEventListener('click', () => {
 function loadFromHash(){
   const h = (location.hash || '').slice(1);
   if(!h) return false;
+  if(h === 'bearbeiten'){ store.set('gb.owner', true); return false; }
   const p = readToken(h);
   const ok = !!(p && setPoem(p, true));
-  if(ok) store.set('gb.fromLink', true);
   return ok;
 }
 function init(){
@@ -1164,7 +1165,7 @@ function init(){
   if(!ok) setPoem(DEMO, false);
   showHome();
 }
-window.addEventListener('hashchange', () => { if(loadFromHash()) showHome(); });
+window.addEventListener('hashchange', () => { loadFromHash(); showHome(); });
 init();
 })();
 </script>
